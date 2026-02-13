@@ -1,5 +1,6 @@
 const User = require("../models/User");
 const bcrypt = require("bcryptjs");
+const CustomError = require("../utils/CustomError")
 
 const userController = {};
 
@@ -8,7 +9,7 @@ userController.createUser = async (request, response) => {
     let { email, password, name, level } = request.body;
     const user = await User.findOne({ email });
     if (user) {
-      throw new Error("이미 가입된 유저입니다.");
+      throw new CustomError("이미 가입된 유저입니다.");
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -21,7 +22,12 @@ userController.createUser = async (request, response) => {
     await newUser.save();
     return response.status(200).json({ status: "success" });
   } catch (error) {
-    response.status(400).json({ status: "fail", message: error.message });
+    console.log(`server error : `, error);
+    response.status(400).json({ 
+      status: "fail", 
+      message: error.message,
+      isUserError: error.isUserError || false
+    });
   }
 };
 
