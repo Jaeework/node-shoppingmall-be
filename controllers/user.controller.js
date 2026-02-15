@@ -1,6 +1,6 @@
 const User = require("../models/User");
 const bcrypt = require("bcryptjs");
-const CustomError = require("../utils/CustomError")
+const CustomError = require("../utils/CustomError");
 
 const userController = {};
 
@@ -30,5 +30,25 @@ userController.createUser = async (request, response) => {
     });
   }
 };
+
+userController.getUserById = async (request, response) => {
+  try {
+    const { userId } = request;
+    const user = User.findById(userId);
+    if (user) {
+      response.status(200).json({ status: "success", user });
+    }
+    const error = new CustomError("유효하지 않은 토큰입니다.");
+    error.isUserError = false;
+    throw error;
+  } catch (error) {
+    console.log(`server error : `, error);
+    response.status(400).json({ 
+      status: "fail", 
+      message: error.message,
+      isUserError: error.isUserError || false
+    });
+  }
+}
 
 module.exports = userController;
