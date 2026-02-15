@@ -34,7 +34,7 @@ userController.createUser = async (request, response) => {
 userController.getUserById = async (request, response) => {
   try {
     const { userId } = request;
-    const user = User.findById(userId);
+    const user = await User.findById(userId);
     if (user) {
       response.status(200).json({ status: "success", user });
     }
