@@ -50,7 +50,7 @@ authController.checkAdminPermission = async (request, response, next) => {
     const { userId } = request;
     const user = await User.findOne({ _id: userId });
     if (user.level !== "admin") {
-      throw new CustomError("권한이 존재하지 않습니다.");
+      throw new CustomError("권한이 존재하지 않습니다.", true);
     }
     next();
   } catch (error) {

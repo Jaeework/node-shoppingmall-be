@@ -35,4 +35,13 @@ productController.createProduct = async (request, response) => {
   }
 };
 
+productController.getProducts = async (request, response) => {
+  try {
+    const products = await Product.find({});
+    response.status(200).json({ status: "success", data: products });
+  } catch (error) {
+    response.status(400).json({ status: "fail", message: error.message, isUserError: false });
+  }
+}
+
 module.exports = productController;
