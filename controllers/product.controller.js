@@ -1,4 +1,5 @@
 const Product = require("../models/Product");
+const CustomError = require("../utils/CustomError");
 const productController = {};
 
 productController.createProduct = async (request, response) => {
@@ -14,6 +15,9 @@ productController.createProduct = async (request, response) => {
       stock,
       status,
     } = request.body;
+    if (!image) {
+      throw new CustomError("이미지를 등록해주세요.", true);
+    }
     const product = new Product({
       sku,
       name,
@@ -31,7 +35,7 @@ productController.createProduct = async (request, response) => {
   } catch (error) {
     response
       .status(400)
-      .json({ status: "fail", message: error.message, isUserError: false });
+      .json({ status: "fail", message: error.message, isUserError: error.isUserError || false });
   }
 };
 
