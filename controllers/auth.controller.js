@@ -19,9 +19,11 @@ authController.loginWithEmail = async (request, response) => {
         return response.status(200).json({ status: "success", user, token });
       }
     }
-    throw new CustomError("이메일 또는 비밀번호를 다시 확인해주세요.");
+    const error = new CustomError("이메일 또는 비밀번호를 다시 확인해주세요.");
+    error.isUserError = true;
+    throw error;
   } catch (error) {
-    response.status(400).json({ status: "fail", message: error.message });
+    response.status(400).json({ status: "fail", message: error.message, isUserError: error.isUserError || false });
   }
 }
 
@@ -29,16 +31,12 @@ authController.authenticate = async (request, response, next) => {
   try {
     const tokenString = request.headers.authorization;
     if (!tokenString) {
-      const error = new CustomError("인증 토큰이 없습니다.");
-      error.isUserError = false;
-      throw error;
+      throw new CustomError("인증 토큰이 없습니다.");
     }
     const token = tokenString.replace("Bearer ", "");
     jwt.verify(token, JWT_SECRET_KEY, (error, payload) => {
       if (error) {
-        const error = new CustomError("유효하지 않은 토큰입니다.");
-        error.isUserError = false;
-        throw error;
+        throw new CustomError("유효하지 않은 토큰입니다.");;
       }
       request.userId = payload._id;
       next();

@@ -1,7 +1,7 @@
 class CustomError extends Error {
   constructor(message) {
     super(message);
-    this.isUserError = true;
+    this.isUserError = false;
   }
 }
 

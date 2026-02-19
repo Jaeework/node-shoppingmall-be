@@ -9,7 +9,9 @@ userController.createUser = async (request, response) => {
     let { email, password, name, level } = request.body;
     const user = await User.findOne({ email });
     if (user) {
-      throw new CustomError("이미 가입된 유저입니다.");
+      const error = new CustomError("이미 가입된 이메일입니다.");
+      error.isUserError = true;
+      throw error;
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -38,9 +40,7 @@ userController.getUserById = async (request, response) => {
     if (user) {
       response.status(200).json({ status: "success", user });
     }
-    const error = new CustomError("유효하지 않은 토큰입니다.");
-    error.isUserError = false;
-    throw error;
+    throw new CustomError("유효하지 않은 토큰입니다.");
   } catch (error) {
     console.log(`server error : `, error);
     response.status(400).json({ 
