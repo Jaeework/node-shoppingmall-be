@@ -13,7 +13,7 @@ const productSchema = Schema({
   isDeleted: {type: Boolean, default: false},
 }, {timestamps: true});
 
-userSchema.methods.toJSON = function () {
+productSchema.methods.toJSON = function () {
   const obj = this._doc;
   delete obj.__v;
   delete obj.updatedAt;

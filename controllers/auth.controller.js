@@ -45,4 +45,21 @@ authController.authenticate = async (request, response, next) => {
   }
 }
 
+authController.checkAdminPermission = async (request, response, next) => {
+  try {
+    const { userId } = request;
+    const user = await User.findOne({ _id: userId });
+    if (user.level !== "admin") {
+      throw new CustomError("권한이 존재하지 않습니다.");
+    }
+    next();
+  } catch (error) {
+    response.status(400).json({
+      status: "fail",
+      message: error.message,
+      isUserError: error.isUserError || false
+    })    
+  }
+}
+
 module.exports = authController;

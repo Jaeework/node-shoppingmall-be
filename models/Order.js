@@ -18,7 +18,7 @@ const orderSchema = Schema({
   orderNum: {type: String},
 }, {timestamps: true});
 
-userSchema.methods.toJSON = function () {
+orderSchema.methods.toJSON = function () {
   const obj = this._doc;
   delete obj.__v;
 
