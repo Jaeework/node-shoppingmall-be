@@ -9,9 +9,7 @@ userController.createUser = async (request, response) => {
     let { email, password, name, level } = request.body;
     const user = await User.findOne({ email });
     if (user) {
-      const error = new CustomError("이미 가입된 이메일입니다.");
-      error.isUserError = true;
-      throw error;
+      throw new CustomError("이미 가입된 이메일입니다.", true);
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
