@@ -10,5 +10,6 @@ router.post(
   productController.createProduct,
 );
 router.get("/", productController.getProducts);
+router.put("/:id", authController.authenticate, authController.checkAdminPermission, productController.updateProduct);
 
 module.exports = router;

@@ -57,8 +57,39 @@ productController.getProducts = async (request, response) => {
     responseJson.data = products;
     response.status(200).json(responseJson);
   } catch (error) {
-    response.status(400).json({ status: "fail", message: error.message, isUserError: false });
+    response.status(400).json({ status: "fail", message: error.message, isUserError: error.isUserError || false });
   }
-}
+};
+
+productController.updateProduct = async (request, response) => {
+  try {
+    const productId = request.params.id;
+    const {
+      sku,
+      name,
+      size,
+      image,
+      category,
+      description,
+      price,
+      stock,
+      status,
+    } = request.body;
+    const product = await Product.findByIdAndUpdate({_id: productId}, {
+      sku,
+      name,
+      size,
+      image,
+      category,
+      description,
+      price,
+      stock,
+      status,}, {new: true});
+      if (!product) throw new CustomError("아이템이 존재하지 않습니다.", true);
+      response.status(200).json({status: "success", data: product});
+  } catch (error) {
+    response.status(400).json({ status: "fail", message: error.message, isUserError: error.isUserError || false });
+  }
+};
 
 module.exports = productController;
