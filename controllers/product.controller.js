@@ -104,6 +104,19 @@ productController.deleteProduct = async (request, response) => {
   } catch (error) {
     response.status(400).json({ status: "fail", message: error.message, isUserError: error.isUserError || false });
   }
+};
+
+productController.getProductById = async (request, response) => {
+  try {
+    const productId = request.params.id;
+    const product = await Product.findById(productId);
+    
+    if (!product) throw new CustomError("상품 정보가 존재하지 않습니다.", true);
+
+    response.status(200).json({ status: "success", data: product });
+  } catch (error) {
+    response.status(400).json({ status: "fail", message: error.message, isUserError: error.isUserError || false });
+  }
 }
 
 module.exports = productController;

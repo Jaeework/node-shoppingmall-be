@@ -10,6 +10,7 @@ router.post(
   productController.createProduct,
 );
 router.get("/", productController.getProducts);
+router.get("/:id", productController.getProductById);
 router.put("/:id", authController.authenticate, authController.checkAdminPermission, productController.updateProduct);
 router.delete("/:id", authController.authenticate, authController.checkAdminPermission, productController.deleteProduct);
 
