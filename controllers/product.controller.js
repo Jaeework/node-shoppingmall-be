@@ -2,6 +2,7 @@ const Product = require("../models/Product");
 const CustomError = require("../utils/CustomError");
 const productController = {};
 
+const PAGE_SIZE = 5;
 productController.createProduct = async (request, response) => {
   try {
     const {
@@ -44,9 +45,17 @@ productController.getProducts = async (request, response) => {
     const { page, name } = request.query;
     const condition = name ? { name: {$regex: name, $options: "i" }} : {};
     let query = Product.find(condition);
+    let responseJson = { status: "success" };
+    if (page) {
+      query.skip((page-1) * PAGE_SIZE).limit(PAGE_SIZE);
+      const totalItemNum = await Product.find(condition).countDocuments();
+      const totalPageNum = Math.ceil(totalItemNum / PAGE_SIZE);
+      responseJson.totalPageNum = totalPageNum;
+    }
     
     const products = await query.exec();
-    response.status(200).json({ status: "success", data: products });
+    responseJson.data = products;
+    response.status(200).json(responseJson);
   } catch (error) {
     response.status(400).json({ status: "fail", message: error.message, isUserError: false });
   }
