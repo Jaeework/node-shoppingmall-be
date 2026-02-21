@@ -43,7 +43,8 @@ productController.createProduct = async (request, response) => {
 productController.getProducts = async (request, response) => {
   try {
     const { page, name } = request.query;
-    const condition = name ? { name: {$regex: name, $options: "i" }} : {};
+    const condition = name ? {name: { $regex: name, $options: "i" }} : {};
+    condition.isDeleted = false;
     let query = Product.find(condition);
     let responseJson = { status: "success" };
     if (page) {
@@ -91,5 +92,18 @@ productController.updateProduct = async (request, response) => {
     response.status(400).json({ status: "fail", message: error.message, isUserError: error.isUserError || false });
   }
 };
+
+productController.deleteProduct = async (request, response) => {
+  try {
+    const productId = request.params.id;
+    const product = await Product.findByIdAndUpdate({_id: productId}, {isDeleted: true}, {new: true});
+
+    if (!product) throw new CustomError("아이템이 존재하지 않습니다.", true);
+
+    response.status(200).json({status: "success", data: product});
+  } catch (error) {
+    response.status(400).json({ status: "fail", message: error.message, isUserError: error.isUserError || false });
+  }
+}
 
 module.exports = productController;
