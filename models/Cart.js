@@ -8,7 +8,7 @@ const cartSchema = Schema({
   items: [{
     productId: {type: mongoose.ObjectId, ref: Product},
     size: {type: String, required: true},
-    price: {type: Number, required: true},
+    // price: {type: Number, required: true},
     qty: {type: Number, default: 1, required: true},
   }],
 }, {timestamps: true});
