@@ -24,7 +24,22 @@ cartController.addItemToCart = async (request, response) => {
 
     response.status(200).json({ status: "success", data: cart, cartItemQuantity: cart.items.length });
   } catch (error) {
-    console.log("error: ", error);
+    response.status(400).json({ status: "fail", message: error.message, isUserError: error.isUserError || false });    
+  }
+}
+
+cartController.getCart = async (request, response) => {
+  try {
+    const { userId } = request;
+    const cart = await Cart.findOne({ userId }).populate({
+      path: "items",
+      populate: {
+        path: "productId",
+        model: "Product",
+      },
+    });
+    response.status(200).json({ status: "success", data: cart.items });
+  } catch (error) {
     response.status(400).json({ status: "fail", message: error.message, isUserError: error.isUserError || false });    
   }
 }
