@@ -1,3 +1,4 @@
+const { request } = require('express');
 const Cart = require("../models/Cart");
 const CustomError = require('../utils/CustomError');
 
@@ -66,6 +67,20 @@ cartController.updateQuantity = async (request, response) => {
     await cart.save();
 
     response.status(200).json({ status: "success", data: cart.items });
+  } catch (error) {
+    response.status(400).json({ status: "fail", message: error.message, isUserError: error.isUserError || false });    
+  }
+}
+
+cartController.deleteCartItem = async (request, response) => {
+  try {
+    const { userId } = request;
+    const { id } = request.params;
+    const cart = await Cart.findOne({ userId });
+    cart.items = cart.items.filter((item) => !item._id.equals(id));
+
+    await cart.save();
+    response.status(200).json({ status: "success", cartItemQuantity: cart.items.length });
   } catch (error) {
     response.status(400).json({ status: "fail", message: error.message, isUserError: error.isUserError || false });    
   }
