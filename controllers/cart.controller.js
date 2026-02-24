@@ -1,4 +1,4 @@
-const { request } = require('express');
+const { request, response } = require('express');
 const Cart = require("../models/Cart");
 const CustomError = require('../utils/CustomError');
 
@@ -82,6 +82,19 @@ cartController.deleteCartItem = async (request, response) => {
     await cart.save();
     response.status(200).json({ status: "success", cartItemQuantity: cart.items.length });
   } catch (error) {
+    response.status(400).json({ status: "fail", message: error.message, isUserError: error.isUserError || false });    
+  }
+}
+
+cartController.getCartItemQuantity = async (request, response) => {
+  try {
+    const { userId } = request;
+    const cart = await Cart.findOne({ userId });
+    if (!cart) throw new ApiError("카트가 존재하지 않습니다.", false);
+    
+    response.status(200).json({ status: "success", cartItemQuantity: cart.items.length });
+  } catch (error) {
+    console.log("error : ", error);
     response.status(400).json({ status: "fail", message: error.message, isUserError: error.isUserError || false });    
   }
 }
