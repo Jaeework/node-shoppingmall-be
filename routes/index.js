@@ -10,6 +10,6 @@ router.use("/users", userApi);
 router.use("/auth", authApi);
 router.use("/products", productApi);
 router.use("/cart", cartApi);
-router.use("/order", orderApi);
+router.use("/orders", orderApi);
 
 module.exports = router;

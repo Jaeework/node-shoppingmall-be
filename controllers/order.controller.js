@@ -5,6 +5,8 @@ const productController = require("./product.controller");
 
 orderController = {};
 
+const PAGE_SIZE = 3;
+
 orderController.createOrder = async (request, response) => {
   try {
     const { userId } = request;
@@ -33,6 +35,36 @@ orderController.createOrder = async (request, response) => {
     response
       .status(200)
       .json({ status: "success", orderNum: newOrder.orderNum });
+  } catch (error) {
+    response.status(400).json({
+      status: "fail",
+      message: error.message,
+      isUserError: error.isUserError || false,
+    });
+  }
+};
+
+orderController.getOrders = async (request, response) => {
+  try {
+    const { page, ordernum } = request.query;
+    const condition = ordernum ? {orderNum: { $regex: ordernum, $options: "i" }} : {};
+    let query = Order.find(condition).populate("userId").populate({
+      path: "items",
+      populate: {
+        path: "productId",
+        model: "Product",
+      },
+    }).sort({createdAt: -1});
+    let responseJson = { status: "success" };
+    if (page) {
+      query.skip((page-1) * PAGE_SIZE).limit(PAGE_SIZE);
+      const totalItemNum = await Order.find(condition).countDocuments();
+      const totalPageNum = await Math.ceil(totalItemNum / PAGE_SIZE);
+      responseJson.totalPageNum = totalPageNum;
+    }
+    const orders = await query.exec();
+    responseJson.data = orders;
+    response.status(200).json(responseJson);
   } catch (error) {
     response.status(400).json({
       status: "fail",
