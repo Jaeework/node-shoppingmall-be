@@ -1,4 +1,3 @@
-const { request, response } = require('express');
 const Cart = require("../models/Cart");
 const CustomError = require('../utils/CustomError');
 
@@ -39,7 +38,8 @@ cartController.getCart = async (request, response) => {
         model: "Product",
       },
     });
-    response.status(200).json({ status: "success", data: cart.items });
+
+    response.status(200).json({ status: "success", data: cart.getActiveItems() });
   } catch (error) {
     response.status(400).json({ status: "fail", message: error.message, isUserError: error.isUserError || false });    
   }
@@ -66,9 +66,9 @@ cartController.updateQuantity = async (request, response) => {
     cart.items[index].qty = qty;
     await cart.save();
 
-    response.status(200).json({ status: "success", data: cart.items });
+    response.status(200).json({ status: "success", data: cart.getActiveItems() });
   } catch (error) {
-    response.status(400).json({ status: "fail", message: error.message, isUserError: error.isUserError || false });    
+    response.status(400).json({ status: "fail", message: error.message, isUserError: error.isUserError || false });
   }
 }
 
@@ -76,23 +76,38 @@ cartController.deleteCartItem = async (request, response) => {
   try {
     const { userId } = request;
     const { id } = request.params;
-    const cart = await Cart.findOne({ userId });
+    const cart = await Cart.findOne({ userId }).populate({
+      path: "items",
+      populate: {
+        path: "productId",
+        model: "Product",
+        select: "status",
+      },
+    });
     cart.items = cart.items.filter((item) => !item._id.equals(id));
 
     await cart.save();
-    response.status(200).json({ status: "success", cartItemQuantity: cart.items.length });
+
+    response.status(200).json({ status: "success", cartItemQuantity: cart.getActiveItems().length });
   } catch (error) {
-    response.status(400).json({ status: "fail", message: error.message, isUserError: error.isUserError || false });    
+    response.status(400).json({ status: "fail", message: error.message, isUserError: error.isUserError || false });
   }
 }
 
 cartController.getCartItemQuantity = async (request, response) => {
   try {
     const { userId } = request;
-    const cart = await Cart.findOne({ userId });
+    const cart = await Cart.findOne({ userId }).populate({
+      path: "items",
+      populate: {
+        path: "productId",
+        model: "Product",
+        select: "status",
+      },
+    });
     if (!cart) throw new ApiError("카트가 존재하지 않습니다.", false);
     
-    response.status(200).json({ status: "success", cartItemQuantity: cart.items.length });
+    response.status(200).json({ status: "success", cartItemQuantity: cart.getActiveItems().length });
   } catch (error) {
     console.log("error : ", error);
     response.status(400).json({ status: "fail", message: error.message, isUserError: error.isUserError || false });    

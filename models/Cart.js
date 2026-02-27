@@ -21,5 +21,11 @@ cartSchema.methods.toJSON = function () {
   return obj;
 }
 
+cartSchema.methods.getActiveItems = function () {
+  return this.items.filter(
+    (item) => item.productId && item.productId.status === "active"
+  );
+}
+
 const Cart = mongoose.model("Cart", cartSchema);
 module.exports = Cart;
