@@ -59,7 +59,7 @@ orderController.getOrders = async (request, response) => {
     if (page) {
       query.skip((page-1) * PAGE_SIZE).limit(PAGE_SIZE);
       const totalItemNum = await Order.find(condition).countDocuments();
-      const totalPageNum = await Math.ceil(totalItemNum / PAGE_SIZE);
+      const totalPageNum = Math.ceil(totalItemNum / PAGE_SIZE);
       responseJson.totalPageNum = totalPageNum;
     }
     const orders = await query.exec();
@@ -73,5 +73,23 @@ orderController.getOrders = async (request, response) => {
     });
   }
 };
+
+orderController.updateOrderStatus = async (request, response) => {
+  try {
+    const orderId = request.params.id;
+    const { status } = request.body;
+    const order = await Order.findByIdAndUpdate({_id: orderId}, {status}, {new: true});
+
+    if (!order) throw new CustomError("해당 주문 정보가 존재하지 않습니다.", true);
+
+    response.status(200).json({status: "success", data: order});
+  } catch (error) {
+    response.status(400).json({
+      status: "fail",
+      message: error.message,
+      isUserError: error.isUserError || false,
+    });
+  }
+}
 
 module.exports = orderController;
