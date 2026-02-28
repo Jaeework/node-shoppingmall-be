@@ -72,10 +72,15 @@ cartController.updateQuantity = async (request, response) => {
   }
 }
 
-cartController.deleteCartItem = async (request, response) => {
+cartController.deleteCartItems = async (request, response) => {
   try {
     const { userId } = request;
-    const { id } = request.params;
+    const { ids } = request.body;
+
+    if (!ids || !Array.isArray(ids) || ids.length === 0) {
+      throw new CustomError("삭제할 상품을 선택해주세요.", true);
+    }
+
     const cart = await Cart.findOne({ userId }).populate({
       path: "items",
       populate: {
@@ -84,8 +89,8 @@ cartController.deleteCartItem = async (request, response) => {
         select: "status",
       },
     });
-    cart.items = cart.items.filter((item) => !item._id.equals(id));
 
+    cart.items = cart.items.filter((item) => !ids.includes(item._id.toString()));
     await cart.save();
 
     response.status(200).json({ status: "success", cartItemQuantity: cart.getActiveItems().length });
