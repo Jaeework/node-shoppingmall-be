@@ -89,7 +89,7 @@ productController.updateProduct = async (request, response) => {
       description,
       price,
       stock,
-      status,}, {new: true});
+      status,}, {returnDocument: "after"});
       if (!product) throw new CustomError("아이템이 존재하지 않습니다.", true);
       response.status(200).json({status: "success", data: product});
   } catch (error) {
@@ -100,7 +100,7 @@ productController.updateProduct = async (request, response) => {
 productController.deleteProduct = async (request, response) => {
   try {
     const productId = request.params.id;
-    const product = await Product.findByIdAndUpdate({_id: productId}, {isDeleted: true}, {new: true});
+    const product = await Product.findByIdAndUpdate({_id: productId}, {isDeleted: true}, {returnDocument: "after"});
 
     if (!product) throw new CustomError("아이템이 존재하지 않습니다.", true);
 

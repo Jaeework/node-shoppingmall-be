@@ -79,7 +79,7 @@ orderController.updateOrderStatus = async (request, response) => {
   try {
     const orderId = request.params.id;
     const { status } = request.body;
-    const order = await Order.findByIdAndUpdate({_id: orderId}, {status}, {new: true});
+    const order = await Order.findByIdAndUpdate({_id: orderId}, {status}, {returnDocument: "after"});
 
     if (!order) throw new CustomError("해당 주문 정보가 존재하지 않습니다.", true);
 
