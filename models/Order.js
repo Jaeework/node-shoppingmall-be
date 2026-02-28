@@ -27,7 +27,20 @@ orderSchema.methods.toJSON = function () {
 }
 orderSchema.post("save", async function () {
   const cart = await Cart.findOne({userId: this.userId});
-  cart.items = [];
+  
+  const orderedItems = this.items.map(item => ({
+    productId: item.productId.toString(),
+    size: item.size
+  }));
+  
+  cart.items = cart.items.filter(cartItem => {
+    const isOrdered = orderedItems.some(
+      ordered => ordered.productId === cartItem.productId.toString() 
+        && ordered.size === cartItem.size
+    );
+    return !isOrdered;
+  });
+  
   await cart.save();
 });
 
