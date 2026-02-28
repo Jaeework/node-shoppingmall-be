@@ -2,8 +2,10 @@ const User = require("../models/User");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const CustomError = require("../utils/CustomError");
+const { OAuth2Client } = require("google-auth-library");
 require("dotenv").config();
 const JWT_SECRET_KEY = process.env.JWT_SECRET_KEY;
+const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 
 const authController = {};
 
@@ -20,6 +22,33 @@ authController.loginWithEmail = async (request, response) => {
       }
     }
     throw new CustomError("이메일 또는 비밀번호를 다시 확인해주세요.", true);
+  } catch (error) {
+    response.status(400).json({ status: "fail", message: error.message, isUserError: error.isUserError || false });
+  }
+}
+
+authController.loginWithGoogle = async (request, response) => {
+  try {
+    const { _token } = request.body;
+    const googleClient = new OAuth2Client(GOOGLE_CLIENT_ID);
+    const ticket = await googleClient.verifyIdToken({
+      idToken: _token,
+      audience: GOOGLE_CLIENT_ID,
+    });
+    const { email, name } = ticket.getPayload();
+    let user = await User.findOne({ email });
+    if (!user) {
+      const randomPassword = "" + Math.floor(Math.random() * 100000000);
+      const newPassword = await bcrypt.hash(randomPassword, 10);
+      user = new User({
+        name,
+        email,
+        password: newPassword
+      });
+      await user.save();
+    }
+    const sessionToken = await user.generateToken();
+    response.status(200).json({ status: "success", user, token: sessionToken });
   } catch (error) {
     response.status(400).json({ status: "fail", message: error.message, isUserError: error.isUserError || false });
   }
