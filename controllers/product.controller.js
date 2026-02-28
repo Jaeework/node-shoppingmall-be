@@ -42,9 +42,12 @@ productController.createProduct = async (request, response) => {
 
 productController.getProducts = async (request, response) => {
   try {
-    const { page, name } = request.query;
-    const condition = name ? {name: { $regex: name, $options: "i" }} : {};
-    condition.isDeleted = false;
+    const { page, name, category } = request.query;
+    
+    const condition = { isDeleted: false };
+    if (name) condition.name =  { $regex: name, $options: "i" };
+    if (category) condition.category = { $regex: category, $options: "i" };
+
     let query = Product.find(condition);
     let responseJson = { status: "success" };
     if (page) {
